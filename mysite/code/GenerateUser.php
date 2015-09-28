@@ -2,23 +2,24 @@
 
 class GenerateUser extends Controller {
 
-    private static $allowed_actions = array(
-        'index',
-        'init'
-    );
-
-    public function init(){
-    	parent::init();
-    	echo '<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script><script src="/themes/simple/javascript/ajax.js"></script>';
-    }
-
-    public function index() {
-        if(isset($_GET['firstName'])){
-            $member = new Member();
-            $member->FirstName      = Convert::raw2sql($_GET['firstName']);
-            $member->Surname        = Convert::raw2sql($_GET['lastName']);
-            $member->Email          = Convert::raw2sql($_GET['email']);
-            $member->changePassword(Convert::raw2sql($_GET['pass']));
-            $member->write();
+    public function index(){
+        //make connection
+        $expiry = 1;
+        $fetch = new RestfulService('https://randomuser.me/api/', $expiry);
+        //make request
+        $results = $fetch->request();
+        //decode request        
+        $results_decoded = json_decode($results->getBody());
+        //make life easier
+        $results = $results_decoded->results['0']->user;
+        //set up new member
+        $member = new Member();
+        $member->FirstName      = Convert::raw2sql($results->name->first);
+        $member->Surname        = Convert::raw2sql($results->name->last);
+        $member->Email          = Convert::raw2sql($results->email);
+        $member->changePassword($results->password);
+        $member->write();
+        //thanks
+        echo 'Thank you, your user, '.$results->name->first.', has been created';
     }
 }
