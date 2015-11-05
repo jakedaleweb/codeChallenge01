@@ -1,3 +1,7 @@
+---
+Name: mysiteroutes
+After: framework/routes
+---
 Director:
   rules:
-    'GenerateUser/$user' : 'GenerateUser'
+    'Generate//$Action': 'GenerateUser'
